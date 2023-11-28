@@ -3,7 +3,7 @@ const User = require("../models/users");
 
 exports.getAllUsers = async (req, res) => {
     try{
-      const result = await User.find().select("username email");
+      const result = await User.find();
       if (result && result.length !== 0) {
           return res.status(200).send({
             msg: "User found!",
@@ -98,9 +98,31 @@ exports.getAllUsers = async (req, res) => {
        });
     }
   }
-  exports.PatchUser = (req, res) => {
-    res.send('respond with a resource');
+  exports.PatchUser = async (req, res) => {
+    try {
+      const update = {};
+      for (const ops of req.body) {
+        update[ops.propName] = ops.value;
+      }
+  const result = await User.findByIdAndUpdate(req.params.id, update)
+  if (result) {
+    return res.status(200).send({
+      msg: "User patched",
+      url: `https://localhost:3000/users/${req.params.id}`
+    })
+    
   }
+  res.status(500).send({
+    msg: "User was not patched",
+    err
+   });
+    } catch (err) {
+      res.status(500).send({
+        msg: "User was not patched",
+        err
+       });
+    }
+  };
   exports.DeleteUser = async (req, res) => {
     try{
       const result = await User.findByIdAndDelete(req.params.id);
